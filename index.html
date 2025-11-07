@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>For Her — Surprise</title>
+<style>
+  :root{--bg:#0f1724;--accent:#ff6b81;--muted:#9aa7b2}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue";background:
+    radial-gradient(circle at 10% 10%, rgba(255,107,129,0.06), transparent 10%),
+    linear-gradient(180deg,#071022 0%, #061926 100%);color:#e6eef6}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+  .card{width:min(860px,96vw);background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:28px;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+  .row{display:flex;gap:20px;align-items:center}
+  .left{flex:1}
+  .title{font-size:1.6rem;margin:0 0 6px 0}
+  .subtitle{color:var(--muted);margin:0 0 18px 0}
+  .typewriter{font-size:1.1rem;line-height:1.6;background:linear-gradient(90deg,#fff,#cbd5e1);
+    -webkit-background-clip:text;background-clip:text;color:transparent;min-height:3.2rem}
+  .photo{width:200px;height:200px;border-radius:12px;object-fit:cover;border:1px solid rgba(255,255,255,0.06)}
+  .controls{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+  .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:8px 12px;border-radius:8px;cursor:pointer}
+  .btn.primary{background:linear-gradient(90deg,var(--accent),#ffa7c1);color:#061022;border:none}
+  .heart{position:relative;width:56px;height:56px;border-radius:50%;display:inline-grid;place-items:center}
+  .heart svg{width:44px;height:44px;transform-origin:center center;animation:beat 1100ms infinite ease-in-out}
+  @keyframes beat{
+    0%{transform:scale(1)}
+    25%{transform:scale(1.18)}
+    50%{transform:scale(1)}
+    75%{transform:scale(1.08)}
+    100%{transform:scale(1)}
+  }
+  .reveal{margin-top:18px;padding:12px;border-radius:10px;background:rgba(255,255,255,0.02);display:none}
+  .photos-row{display:flex;gap:8px;margin-top:12px}
+  .photos-row img{width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
+  footer{margin-top:14px;color:var(--muted);font-size:0.85rem}
+  @media (max-width:720px){.row{flex-direction:column}.photo{width:100%;height:180px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card" role="main" aria-label="Surprise message">
+    <div class="row">
+      <div class="left">
+        <h1 class="title">A little surprise for <span id="herName">HerName</span> 💌</h1>
+        <p class="subtitle">Made with a bit of thought and a little code — click play to start.</p>
+
+        <div class="typewriter" id="typed"></div>
+
+        <div class="controls">
+          <button class="btn primary" id="playBtn">Play surprise</button>
+          <button class="btn" id="revealBtn">Reveal full message</button>
+          <div style="margin-left:auto" class="heart" title="heart">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 21s-7.5-4.733-9.364-8.01C-1.197 6.912 6.222 3.5 9.5 7 12.778 10.5 12 13 12 13s.778-2.5 2.5-6C17.778 3.5 24.197 6.912 21.364 12.99 19.5 17.267 12 21 12 21z" fill="url(#g)"/>
+              <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ff6b81"/><stop offset="1" stop-color="#ffa7c1"/></linearGradient></defs>
+            </svg>
+          </div>
+        </div>
+
+        <div class="reveal" id="revealArea">
+          <p id="fullMessage">Hey — this is a little note to say I think you’re wonderful. — <span id="fromName">YOUR_NAME</span></p>
+          <div class="photos-row" id="photos"></div>
+          <footer>Share this link or open this file anytime ✨</footer>
+        </div>
+      </div>
+
+      <img class="photo" id="mainPhoto" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=60" alt="Surprise photo">
+    </div>
+  </div>
+</div>
+
+<audio id="bgm" src="your-song.mp3" preload="auto"></audio>
+
+<script>
+  // --------- Customize these:
+  const HER_NAME = "Asha";        // set her name
+  const FROM_NAME = "Somnath";    // set your name
+  const typedLines = [
+    "Hey " + HER_NAME + "…",
+    "I made a tiny surprise just for you.",
+    "Click 'Reveal full message' when you're ready."
+  ];
+  const photoUrls = [
+    "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=600&q=60",
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=60",
+    "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=60"
+  ];
+  // -------------------------
+
+  // wire up UI
+  document.getElementById('herName').textContent = HER_NAME;
+  document.getElementById('fromName').textContent = FROM_NAME;
+
+  const typedEl = document.getElementById('typed');
+  const playBtn = document.getElementById('playBtn');
+  const revealBtn = document.getElementById('revealBtn');
+  const revealArea = document.getElementById('revealArea');
+  const photosContainer = document.getElementById('photos');
+  const mainPhoto = document.getElementById('mainPhoto');
+  const bgm = document.getElementById('bgm');
+
+  // typing effect
+  function typeLines(lines, el, speed = 40){
+    let i=0, lineIdx=0;
+    el.textContent = "";
+    function typeChar(){
+      if(lineIdx >= lines.length) return;
+      const line = lines[lineIdx];
+      if(i < line.length){
+        el.textContent = el.textContent + line.charAt(i);
+        i++;
+        setTimeout(typeChar, speed);
+      } else {
+        el.textContent += "\n";
+        i = 0;
+        lineIdx++;
+        setTimeout(typeChar, speed + 300);
+      }
+    }
+    typeChar();
+  }
+
+  // autoplay music when user clicks Play (browsers block auto-play)
+  playBtn.addEventListener('click', () => {
+    bgm.currentTime = 0;
+    bgm.play().catch(()=>{/* ignore */});
+    typeLines(typedLines, typedEl, 36);
+    playBtn.disabled = true;
+    playBtn.textContent = "Playing…";
+  });
+
+  // reveal area
+  revealBtn.addEventListener('click', () => {
+    revealArea.style.display = 'block';
+    // fill photos
+    photosContainer.innerHTML = "";
+    photoUrls.forEach((u, idx) => {
+      const img = document.createElement('img');
+      img.src = u;
+      img.alt = `photo ${idx+1}`;
+      img.addEventListener('click', ()=> mainPhoto.src = u);
+      photosContainer.appendChild(img);
+    });
+    // set a nicer full message
+    document.getElementById('fullMessage').textContent = `Hey ${HER_NAME}, I built this little surprise because you light up the small things. Hope it makes you smile. — ${FROM_NAME}`;
+    revealBtn.disabled = true;
+    revealBtn.textContent = "Revealed ✓";
+  });
+
+  // accessibility: stop music when page hidden
+  document.addEventListener('visibilitychange', ()=>{
+    if(document.hidden) bgm.pause();
+  });
+</script>
+</body>
+</html>
